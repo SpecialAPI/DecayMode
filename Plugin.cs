@@ -16,7 +16,7 @@ namespace DecayMode
     {
         public const string GUID = "SpecialAPI.DecayMode";
         public const string NAME = "Decay Mode";
-        public const string VERSION = "1.0.0";
+        public const string VERSION = "1.1.0";
 
         public static MethodInfo ad_adi = AccessTools.Method(typeof(Plugin), nameof(AddDecay_ActuallyDoIt));
         public static MethodInfo ad_os_adi = AccessTools.Method(typeof(Plugin), nameof(AddDecay_OnSpawn_ActuallyDoIt));
@@ -24,18 +24,38 @@ namespace DecayMode
 
         public static string[] EnemiesWithDecayOnSpawn = new string[]
         {
+            "NextOfKin_EN",
+            "Moone_EN",
+
             "HeavensGateBlue_BOSS",
             "HeavensGatePurple_BOSS",
             "HeavensGateRed_BOSS",
             "HeavensGateYellow_BOSS",
 
             "OsmanLeft_BOSS",
-            "OsmanRight_BOSS"
+            "OsmanRight_BOSS",
+
+            "Bronzo_MoneyPile_EN",
+            "BronzoExtra_EN",
+            "Bronzo_Bananas_Mean_EN"
+        };
+
+        public static string[] EnemiesWithBronzoDecay = new string[]
+        {
+            "Bronzo_MoneyPile_EN",
+            "BronzoExtra_EN",
+            "Bronzo_Bananas_Mean_EN"
         };
 
         public static string[] EnemiesIgnoredForDecay = new string[]
         {
-            "OsmanSinnoks_BOSS"
+            "OsmanSinnoks_BOSS",
+
+            "Bronzo1_EN",
+            "Bronzo2_EN",
+            "Bronzo3_EN",
+            "Bronzo4_EN",
+            "Bronzo5_EN",
         };
 
         public static UnitStoreData_BasicSO PersonalizedDecayStoreData;
@@ -46,6 +66,26 @@ namespace DecayMode
 
             PersonalizedDecayStoreData.name = PersonalizedDecayStoreData._UnitStoreDataID = "DecayMode_PersonalizedDecay_SV";
             LoadedDBsHandler.MiscDB.AddNewUnitStoreData(PersonalizedDecayStoreData._UnitStoreDataID, PersonalizedDecayStoreData);
+
+            var removeDecayEffect = ScriptableObject.CreateInstance<RemovePassiveEffect>();
+            removeDecayEffect.m_PassiveID = PassiveType_GameIDs.Decay.ToString();
+            var removeDecayFromAllies = Effects.GenerateEffect(removeDecayEffect, 0, Targeting.Unit_OtherAllies);
+
+            var bronzo1 = LoadedAssetsHandler.GetEnemy("Bronzo1_EN");
+            if (bronzo1.passiveAbilities.Count > 0 && bronzo1.passiveAbilities[0] is PerformEffectPassiveAbility bronzo1Decay)
+                bronzo1Decay.effects = [removeDecayFromAllies, ..bronzo1Decay.effects];
+
+            var bronzo2 = LoadedAssetsHandler.GetEnemy("Bronzo2_EN");
+            if (bronzo2.passiveAbilities.Count > 2 && bronzo2.passiveAbilities[2] is PerformEffectPassiveAbility bronzo2Decay)
+                bronzo2Decay.effects = [removeDecayFromAllies, .. bronzo2Decay.effects];
+
+            var bronzo3 = LoadedAssetsHandler.GetEnemy("Bronzo3_EN");
+            if (bronzo3.passiveAbilities.Count > 2 && bronzo3.passiveAbilities[2] is PerformEffectPassiveAbility bronzo3Decay)
+                bronzo3Decay.effects = [removeDecayFromAllies, .. bronzo3Decay.effects];
+
+            var bronzo4 = LoadedAssetsHandler.GetEnemy("Bronzo4_EN");
+            if (bronzo4.passiveAbilities.Count > 3 && bronzo4.passiveAbilities[3] is PerformEffectPassiveAbility bronzo4Decay)
+                bronzo4Decay.effects = [removeDecayFromAllies, .. bronzo4Decay.effects];
 
             new Harmony(GUID).PatchAll();
         }
@@ -92,10 +132,25 @@ namespace DecayMode
             if (en == null || Array.IndexOf(EnemiesIgnoredForDecay, en.Enemy.name) >= 0)
                 return;
 
-            if (!LoadedDBsHandler.EnemyDB.TryGetEnemyPoolEffect(PoolList_GameIDs.Sepulchre.ToString(), out SpawnMassivelyEverywhereUsingHealthEffect sepulch) || sepulch == null || sepulch._possibleEnemies == null || sepulch._possibleEnemies.Count <= 0)
-                return;
+            var bronzo = Array.IndexOf(EnemiesWithBronzoDecay, en.Enemy.name) >= 0;
+            List<EnemySO> pool;
 
-            var rngEn = sepulch._possibleEnemies[UnityEngine.Random.Range(0, sepulch._possibleEnemies.Count)];
+            if (bronzo)
+            {
+                if (!LoadedDBsHandler.EnemyDB.TryGetEnemyPoolEffect(PoolList_GameIDs.Bronzo.ToString(), out SpawnRandomEnemyAnywhereEffect bronz) || bronz == null || bronz._enemies == null || bronz._enemies.Count <= 0)
+                    return;
+
+                pool = bronz._enemies;
+            }
+            else
+            {
+                if (!LoadedDBsHandler.EnemyDB.TryGetEnemyPoolEffect(PoolList_GameIDs.Sepulchre.ToString(), out SpawnMassivelyEverywhereUsingHealthEffect sepulch) || sepulch == null || sepulch._possibleEnemies == null || sepulch._possibleEnemies.Count <= 0)
+                    return;
+
+                pool = sepulch._possibleEnemies;
+            }
+
+            var rngEn = pool[UnityEngine.Random.Range(0, pool.Count)];
 
             if (en.TryGetPassiveAbility(PassiveType_GameIDs.Decay.ToString(), out var existing))
             {
