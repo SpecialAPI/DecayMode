@@ -17,7 +17,7 @@ namespace DecayMode
     {
         public const string GUID = "SpecialAPI.DecayMode";
         public const string NAME = "Decay Mode";
-        public const string VERSION = "1.1.0";
+        public const string VERSION = "1.2.0";
 
         public static MethodInfo ad_adi = AccessTools.Method(typeof(Plugin), nameof(AddDecay_ActuallyDoIt));
         public static MethodInfo ad_os_adi = AccessTools.Method(typeof(Plugin), nameof(AddDecay_OnSpawn_ActuallyDoIt));
