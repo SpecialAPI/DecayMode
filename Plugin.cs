@@ -206,7 +206,7 @@ namespace DecayMode
         {
             var crs = new ILCursor(ctx);
 
-            while (crs.TryGotoNext(MoveType.After, x => x.MatchCall<EnemyCombat>(nameof(EnemyCombat.ConnectPassives))))
+            while (crs.TryGotoNext(MoveType.After, x => x.MatchCallOrCallvirt<EnemyCombat>(nameof(EnemyCombat.ConnectPassives))))
             {
                 crs.Emit(OpCodes.Ldloc_3);
                 crs.Emit(OpCodes.Call, adob_adi);
