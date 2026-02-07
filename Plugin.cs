@@ -12,16 +12,13 @@ using UnityEngine;
 namespace DecayMode
 {
     [BepInPlugin(GUID, NAME, VERSION)]
-    [HarmonyPatch]
     public class Plugin : BaseUnityPlugin
     {
         public const string GUID = "SpecialAPI.DecayMode";
         public const string NAME = "Decay Mode";
         public const string VERSION = "1.2.0";
 
-        public static MethodInfo ad_adi = AccessTools.Method(typeof(Plugin), nameof(AddDecay_ActuallyDoIt));
-        public static MethodInfo ad_os_adi = AccessTools.Method(typeof(Plugin), nameof(AddDecay_OnSpawn_ActuallyDoIt));
-        public static MethodInfo adob_adi = AccessTools.Method(typeof(Plugin), nameof(AddDecayOnUnbox_ActuallyDoIt));
+        public static Harmony HarmonyInstance;
 
         public static UnitStoreData_BasicSO PersonalizedDecayStoreData;
 
@@ -54,137 +51,8 @@ namespace DecayMode
             if (bronzo4.passiveAbilities.Count > 3 && bronzo4.passiveAbilities[3] is PerformEffectPassiveAbility bronzo4Decay)
                 bronzo4Decay.effects = [removeDecayFromAllies, .. bronzo4Decay.effects];
 
-            new Harmony(GUID).PatchAll();
-        }
-
-        public static EnemyCombat AddDecay_OnSpawn_ActuallyDoIt(EnemyCombat en)
-        {
-            if (en == null || Array.IndexOf(ModConfig.EnemiesWithDecayOnSpawn, en.Enemy.name) < 0)
-                return en;
-
-            AddDecayToEnemy(en);
-
-            return en;
-        }
-
-        public static void AddDecayToEnemy(EnemyCombat en)
-        {
-            if (en == null || Array.IndexOf(ModConfig.EnemiesIgnoredForDecay, en.Enemy.name) >= 0)
-                return;
-
-            var bronzo = Array.IndexOf(ModConfig.EnemiesWithBronzoDecay, en.Enemy.name) >= 0;
-            if (ModConfig.DecayMean)
-                bronzo = true;
-
-            if (!TryGetDecayEnemy(bronzo, out var rngEn))
-                return;
-
-            if (en.TryGetPassiveAbility(PassiveType_GameIDs.Decay.ToString(), out var existing))
-            {
-                en.PassiveAbilities.Remove(existing);
-                existing.OnTriggerDettached(en);
-            }
-
-            if (en.ContainsPassiveAbility(PassiveType_GameIDs.Decay.ToString()))
-                return; // WTF?
-
-            var personalizedDecay = Passives.DecayGenerator(rngEn, 100, false);
-
-            en.PassiveAbilities.Add(personalizedDecay);
-            personalizedDecay.OnTriggerAttached(en);
-
-            if (!en.TryGetStoredData(PersonalizedDecayStoreData._UnitStoreDataID, out var hold) || hold.m_ObjectData is not BasePassiveAbilitySO)
-                hold.m_ObjectData = personalizedDecay;
-        }
-
-        public static bool TryGetDecayEnemy(bool bronzoPool, out EnemySO enemy)
-        {
-            enemy = null;
-            List<EnemySO> pool;
-
-            if (bronzoPool)
-            {
-                if (!LoadedDBsHandler.EnemyDB.TryGetEnemyPoolEffect(PoolList_GameIDs.Bronzo.ToString(), out SpawnRandomEnemyAnywhereEffect bronz) || bronz == null)
-                    return false;
-
-                pool = bronz._enemies;
-            }
-            else
-            {
-                if (!LoadedDBsHandler.EnemyDB.TryGetEnemyPoolEffect(PoolList_GameIDs.Sepulchre.ToString(), out SpawnMassivelyEverywhereUsingHealthEffect sepulch) || sepulch == null)
-                    return false;
-
-                pool = sepulch._possibleEnemies;
-            }
-
-            if (pool == null || pool.Count <= 0)
-                return false;
-
-            enemy = pool[UnityEngine.Random.Range(0, pool.Count)];
-            return true;
-        }
-
-        [HarmonyPatch(typeof(CombatStats), nameof(CombatStats.Initialization))]
-        [HarmonyILManipulator]
-        public static void AddDecay_Tranpsiler(ILContext ctx)
-        {
-            var crs = new ILCursor(ctx);
-
-            while (crs.TryGotoNext(MoveType.After, x => x.MatchNewobj<EnemyCombat>()))
-                crs.Emit(OpCodes.Call, ad_adi);
-        }
-
-        [HarmonyPatch(typeof(CombatStats), nameof(CombatStats.AddNewEnemy))]
-        [HarmonyILManipulator]
-        public static void AddDecay_OnSpawn_Tranpsiler(ILContext ctx)
-        {
-            var crs = new ILCursor(ctx);
-
-            while (crs.TryGotoNext(MoveType.After, x => x.MatchNewobj<EnemyCombat>()))
-                crs.Emit(OpCodes.Call, ad_os_adi);
-        }
-
-        public static EnemyCombat AddDecay_ActuallyDoIt(EnemyCombat en)
-        {
-            AddDecayToEnemy(en);
-
-            return en;
-        }
-
-        [HarmonyPatch(typeof(EnemyCombat), nameof(EnemyCombat.TransformEnemy))]
-        [HarmonyPostfix]
-        public static void AddDecayOnPostTransform(EnemyCombat __instance)
-        {
-            if (!__instance.TryGetStoredData(PersonalizedDecayStoreData._UnitStoreDataID, out var hold, false))
-                return;
-
-            if (hold == null || hold.m_ObjectData is not BasePassiveAbilitySO decay)
-                return;
-
-            __instance.AddPassiveAbility(decay);
-        }
-
-        [HarmonyPatch(typeof(CombatStats), nameof(CombatStats.TryUnboxEnemy))]
-        [HarmonyILManipulator]
-        public static void AddDecayOnUnbox_Transpiler(ILContext ctx)
-        {
-            var crs = new ILCursor(ctx);
-
-            while (crs.TryGotoNext(MoveType.After, x => x.MatchCallOrCallvirt<EnemyCombat>(nameof(EnemyCombat.ConnectPassives))))
-            {
-                crs.Emit(OpCodes.Ldloc_3);
-                crs.Emit(OpCodes.Call, adob_adi);
-            }
-        }
-        public static void AddDecayOnUnbox_ActuallyDoIt(EnemyCombat enm)
-        {
-            if (!enm.TryGetStoredData(PersonalizedDecayStoreData._UnitStoreDataID, out var hold, false))
-                return;
-
-            if (hold == null || hold.m_ObjectData is not BasePassiveAbilitySO decay)
-                return;
-
-            enm.AddPassiveAbility(decay);
+            HarmonyInstance = new Harmony(GUID);
+            HarmonyInstance.PatchAll();
         }
     }
 }
