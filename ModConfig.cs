@@ -49,19 +49,19 @@ namespace DecayMode
         private static ConfigEntry<string> EnemiesWithDecayOnSpawnEntry;
         private static ConfigEntry<string> EnemiesWithBronzoDecayEntry;
         private static ConfigEntry<string> EnemiesIgnoredForDecayEntry;
-        private static ConfigEntry<bool> DecayMeanEntry;
+        private static ConfigEntry<DecayModeEnemyPool> EnemyPoolEntry;
 
         public static string[] EnemiesWithDecayOnSpawn => EnemiesWithDecayOnSpawnEntry?.Value?.Split(SeparatorArray, StringSplitOptions.RemoveEmptyEntries) ?? [];
         public static string[] EnemiesWithBronzoDecay => EnemiesWithBronzoDecayEntry?.Value?.Split(SeparatorArray, StringSplitOptions.RemoveEmptyEntries) ?? [];
         public static string[] EnemiesIgnoredForDecay => EnemiesIgnoredForDecayEntry?.Value?.Split(SeparatorArray, StringSplitOptions.RemoveEmptyEntries) ?? [];
-        public static bool DecayMean => DecayMeanEntry?.Value ?? false;
+        public static DecayModeEnemyPool EnemyPool => EnemyPoolEntry?.Value ?? DecayModeEnemyPool.Sepulchre;
 
         public static void Init()
         {
             EnemiesWithDecayOnSpawnEntry = File.Bind("DecayMode", "EnemiesWithDecayOnSpawn", string.Join(Separator, EnemiesWithDecayOnSpawn_Default));
             EnemiesWithBronzoDecayEntry = File.Bind("DecayMode", "EnemiesWithBronzoDecay", string.Join(Separator, EnemiesWithBronzoDecay_Default));
             EnemiesIgnoredForDecayEntry = File.Bind("DecayMode", "EnemiesIgnoredForDecay", string.Join(Separator, EnemiesIgnoredForDecay_Default));
-            DecayMeanEntry = File.Bind("DecayMode", "DecayMean", false, "Bronzo mode. If set to true, Decay Mode will draw from the Bronzo pool instead of the Sepulchre pool.");
+            EnemyPoolEntry = File.Bind("DecayMode", "EnemyPool", DecayModeEnemyPool.Sepulchre);
         }
     }
 }

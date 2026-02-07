@@ -16,11 +16,11 @@ namespace DecayMode
             if (en == null || Array.IndexOf(ModConfig.EnemiesIgnoredForDecay, en.Enemy.name) >= 0)
                 return;
 
-            var bronzo = Array.IndexOf(ModConfig.EnemiesWithBronzoDecay, en.Enemy.name) >= 0;
-            if (ModConfig.DecayMean)
-                bronzo = true;
+            var pool = ModConfig.EnemyPool;
+            if (Array.IndexOf(ModConfig.EnemiesWithBronzoDecay, en.Enemy.name) >= 0)
+                pool = DecayModeEnemyPool.Bronzo;
 
-            if (!TryGetDecayEnemy(bronzo, out var rngEn))
+            if (!EnemyPools.TryGetRandomEnemyFromPool(pool, out var rngEn))
                 return;
 
             if (en.TryGetPassiveAbility(PassiveType_GameIDs.Decay.ToString(), out var existing))
@@ -39,33 +39,6 @@ namespace DecayMode
 
             if (!en.TryGetStoredData(Plugin.PersonalizedDecayStoreData._UnitStoreDataID, out var hold) || hold.m_ObjectData is not BasePassiveAbilitySO)
                 hold.m_ObjectData = personalizedDecay;
-        }
-
-        public static bool TryGetDecayEnemy(bool bronzoPool, out EnemySO enemy)
-        {
-            enemy = null;
-            List<EnemySO> pool;
-
-            if (bronzoPool)
-            {
-                if (!LoadedDBsHandler.EnemyDB.TryGetEnemyPoolEffect(PoolList_GameIDs.Bronzo.ToString(), out SpawnRandomEnemyAnywhereEffect bronz) || bronz == null)
-                    return false;
-
-                pool = bronz._enemies;
-            }
-            else
-            {
-                if (!LoadedDBsHandler.EnemyDB.TryGetEnemyPoolEffect(PoolList_GameIDs.Sepulchre.ToString(), out SpawnMassivelyEverywhereUsingHealthEffect sepulch) || sepulch == null)
-                    return false;
-
-                pool = sepulch._possibleEnemies;
-            }
-
-            if (pool == null || pool.Count <= 0)
-                return false;
-
-            enemy = pool[UnityEngine.Random.Range(0, pool.Count)];
-            return true;
         }
 
         [HarmonyPatch(typeof(CombatStats), nameof(CombatStats.Initialization))]
