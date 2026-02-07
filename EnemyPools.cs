@@ -27,29 +27,78 @@ namespace DecayMode
             [DecayModeEnemyPool.Conductor] = PoolList_GameIDs.Conductor
         };
 
+        public static bool TryGetRandomEnemyFromPool(DecayModeEnemyPool pool, out EnemySO enemy)
+        {
+            if (!TryGetEnemyPool(pool, out var enemies) || enemies == null || enemies.Count == 0)
+            {
+                enemy = null;
+                return false;
+            }
+
+            enemy = enemies[UnityEngine.Random.Range(0, enemies.Count)];
+            return true;
+        }
+
         public static bool TryGetEnemyPool(DecayModeEnemyPool pool, out List<EnemySO> enemies)
         {
-            if (MassSpawnPools.TryGetValue(pool, out var massspawn))
+            if(pool == DecayModeEnemyPool.CustomEnemyPool)
             {
-                if (LoadedDBsHandler.EnemyDB.TryGetEnemyPoolEffect(massspawn.ToString(), out SpawnMassivelyEverywhereUsingHealthEffect massspawneffect))
+                enemies = [];
+                foreach(var id in ModConfig.CustomEnemyPool)
                 {
-                    enemies = massspawneffect._possibleEnemies;
+                    var enm = LoadedAssetsHandler.GetEnemy(id);
+
+                    if (enm == null)
+                        continue;
+
+                    enemies.Add(enm);
+                }
+
+                return true;
+            }
+            else if(pool == DecayModeEnemyPool.EnemiesWithUnitType)
+            {
+                enemies = [];
+                foreach(var id in LoadedDBsHandler.EnemyDB.EnemiesList)
+                {
+                    var enm = LoadedAssetsHandler.GetEnemy(id);
+
+                    if (enm == null)
+                        continue;
+
+                    foreach(var unitType in ModConfig.TargetUnitTypes)
+                    {
+                        if (!enm.unitTypes.Contains(unitType))
+                            continue;
+
+                        enemies.Add(enm);
+                        break;
+                    }
+                }
+
+                return true;
+            }
+            else if (IsMassSpawnPool(pool, out var massSpawnId))
+            {
+                if (LoadedDBsHandler.EnemyDB.TryGetEnemyPoolEffect(massSpawnId, out SpawnMassivelyEverywhereUsingHealthEffect massSpawnEffect))
+                {
+                    enemies = massSpawnEffect._possibleEnemies;
                     return true;
                 }
             }
-            else if (RandomSpawnPools.TryGetValue(pool, out var randomspawn))
+            else if (IsRandomSpawnPool(pool, out var randomSpawnId))
             {
-                if (LoadedDBsHandler.EnemyDB.TryGetEnemyPoolEffect(randomspawn.ToString(), out SpawnRandomEnemyAnywhereEffect randomspawneffect))
+                if (LoadedDBsHandler.EnemyDB.TryGetEnemyPoolEffect(randomSpawnId, out SpawnRandomEnemyAnywhereEffect randomSpawnEffect))
                 {
-                    enemies = randomspawneffect._enemies;
+                    enemies = randomSpawnEffect._enemies;
                     return true;
                 }
             }
-            else if(TransformPools.TryGetValue(pool, out var transform))
+            else if (IsTransformPool(pool, out var transformId))
             {
-                if (LoadedDBsHandler.EnemyDB.TryGetEnemyPoolEffect(transform.ToString(), out CasterRandomTransformationEffect transformeffect))
+                if (LoadedDBsHandler.EnemyDB.TryGetEnemyPoolEffect(transformId, out CasterRandomTransformationEffect transformEffect))
                 {
-                    enemies = transformeffect._possibleTransformations.ConvertAll(x => x.enemyTransformation);
+                    enemies = transformEffect._possibleTransformations.ConvertAll(x => x.enemyTransformation);
                     return true;
                 }
             }
@@ -58,16 +107,55 @@ namespace DecayMode
             return false;
         }
 
-        public static bool TryGetRandomEnemyFromPool(DecayModeEnemyPool pool, out EnemySO enemy)
+        private static bool IsMassSpawnPool(DecayModeEnemyPool pool, out string massSpawnId)
         {
-            if(!TryGetEnemyPool(pool, out var enemies) || enemies == null || enemies.Count == 0)
+            if(pool == DecayModeEnemyPool.ModdedMassSpawnPool)
             {
-                enemy = null;
-                return false;
+                massSpawnId = ModConfig.ModdedRandomSpawnPool;
+                return true;
+            }
+            if(MassSpawnPools.TryGetValue(pool, out var poolList))
+            {
+                massSpawnId = poolList.ToString();
+                return true;
             }
 
-            enemy = enemies[UnityEngine.Random.Range(0, enemies.Count)];
-            return true;
+            massSpawnId = string.Empty;
+            return false;
+        }
+
+        private static bool IsRandomSpawnPool(DecayModeEnemyPool pool, out string randomSpawnId)
+        {
+            if(pool == DecayModeEnemyPool.ModdedRandomSpawnPool)
+            {
+                randomSpawnId = ModConfig.ModdedRandomSpawnPool;
+                return true;
+            }
+            if(RandomSpawnPools.TryGetValue(pool, out var poolList))
+            {
+                randomSpawnId = poolList.ToString();
+                return true;
+            }
+
+            randomSpawnId = string.Empty;
+            return false;
+        }
+
+        private static bool IsTransformPool(DecayModeEnemyPool pool, out string transformId)
+        {
+            if(pool == DecayModeEnemyPool.ModdedTransformPool)
+            {
+                transformId = ModConfig.ModdedTransformPool;
+                return true;
+            }
+            if(TransformPools.TryGetValue(pool, out var poolList))
+            {
+                transformId = poolList.ToString();
+                return true;
+            }
+
+            transformId = string.Empty;
+            return false;
         }
     }
 
@@ -83,6 +171,13 @@ namespace DecayMode
         GildedGulper,
         MusicMan,
         Conductor,
-        CadaverSynod
+        CadaverSynod,
+
+        ModdedMassSpawnPool,
+        ModdedRandomSpawnPool,
+        ModdedTransformPool,
+
+        EnemiesWithUnitType,
+        CustomEnemyPool
     }
 }

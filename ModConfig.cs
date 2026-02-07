@@ -47,21 +47,39 @@ namespace DecayMode
         };
 
         private static ConfigEntry<string> EnemiesWithDecayOnSpawnEntry;
-        private static ConfigEntry<string> EnemiesWithBronzoDecayEntry;
         private static ConfigEntry<string> EnemiesIgnoredForDecayEntry;
+
         private static ConfigEntry<DecayModeEnemyPool> EnemyPoolEntry;
+        private static ConfigEntry<string> EnemiesWithBronzoDecayEntry;
+        private static ConfigEntry<string> ModdedMassSpawnPoolEntry;
+        private static ConfigEntry<string> ModdedRandomSpawnPoolEntry;
+        private static ConfigEntry<string> ModdedTransformPoolEntry;
+        private static ConfigEntry<string> TargetUnitTypesEntry;
+        private static ConfigEntry<string> CustomEnemyPoolEntry;
 
         public static string[] EnemiesWithDecayOnSpawn => EnemiesWithDecayOnSpawnEntry?.Value?.Split(SeparatorArray, StringSplitOptions.RemoveEmptyEntries) ?? [];
-        public static string[] EnemiesWithBronzoDecay => EnemiesWithBronzoDecayEntry?.Value?.Split(SeparatorArray, StringSplitOptions.RemoveEmptyEntries) ?? [];
         public static string[] EnemiesIgnoredForDecay => EnemiesIgnoredForDecayEntry?.Value?.Split(SeparatorArray, StringSplitOptions.RemoveEmptyEntries) ?? [];
+
         public static DecayModeEnemyPool EnemyPool => EnemyPoolEntry?.Value ?? DecayModeEnemyPool.Sepulchre;
+        public static string[] EnemiesWithBronzoDecay => EnemiesWithBronzoDecayEntry?.Value?.Split(SeparatorArray, StringSplitOptions.RemoveEmptyEntries) ?? [];
+        public static string ModdedMassSpawnPool => ModdedMassSpawnPoolEntry?.Value ?? string.Empty;
+        public static string ModdedRandomSpawnPool => ModdedRandomSpawnPoolEntry?.Value ?? string.Empty;
+        public static string ModdedTransformPool => ModdedTransformPoolEntry?.Value ?? string.Empty;
+        public static string[] TargetUnitTypes => TargetUnitTypesEntry?.Value?.Split(SeparatorArray, StringSplitOptions.RemoveEmptyEntries) ?? [];
+        public static string[] CustomEnemyPool => CustomEnemyPoolEntry?.Value?.Split(SeparatorArray, StringSplitOptions.RemoveEmptyEntries) ?? [];
 
         public static void Init()
         {
             EnemiesWithDecayOnSpawnEntry = File.Bind("DecayMode", "EnemiesWithDecayOnSpawn", string.Join(Separator, EnemiesWithDecayOnSpawn_Default));
-            EnemiesWithBronzoDecayEntry = File.Bind("DecayMode", "EnemiesWithBronzoDecay", string.Join(Separator, EnemiesWithBronzoDecay_Default));
             EnemiesIgnoredForDecayEntry = File.Bind("DecayMode", "EnemiesIgnoredForDecay", string.Join(Separator, EnemiesIgnoredForDecay_Default));
-            EnemyPoolEntry = File.Bind("DecayMode", "EnemyPool", DecayModeEnemyPool.Sepulchre);
+
+            EnemyPoolEntry = File.Bind("DecayMode.EnemyPool", "EnemyPool", DecayModeEnemyPool.Sepulchre);
+            EnemiesWithBronzoDecayEntry = File.Bind("DecayMode.EnemyPool", "EnemiesWithBronzoDecay", string.Join(Separator, EnemiesWithBronzoDecay_Default));
+            ModdedMassSpawnPoolEntry = File.Bind("DecayMode.EnemyPool", "ModdedMassSpawnPool", "");
+            ModdedRandomSpawnPoolEntry = File.Bind("DecayMode.EnemyPool", "ModdedRandomSpawnPool", "");
+            ModdedTransformPoolEntry = File.Bind("DecayMode.EnemyPool", "ModdedTransformPool", "");
+            TargetUnitTypesEntry = File.Bind("DecayMode.EnemyPool", "TargetUnitTypes", "");
+            CustomEnemyPoolEntry = File.Bind("DecayMode.EnemyPool", "CustomEnemyPool", "");
         }
     }
 }
