@@ -32,7 +32,12 @@ namespace DecayMode
             if (en.ContainsPassiveAbility(PassiveType_GameIDs.Decay.ToString()))
                 return; // WTF?
 
-            var personalizedDecay = Passives.DecayGenerator(rngEn, 100, false);
+            var personalizedDecay = Passives.DecayGenerator(rngEn, ModConfig.DecayChance, ModConfig.IgnoreWithering);
+            if (ModConfig.HideDecayEnemy)
+            {
+                personalizedDecay._characterDescription = $"Upon death this party member has a {ModConfig.DecayChance}% chance of spawning an enemy.";
+                personalizedDecay._enemyDescription = $"Upon death this enemy has a {ModConfig.DecayChance}% chance of spawning an enemy.";
+            }
 
             en.PassiveAbilities.Add(personalizedDecay);
             personalizedDecay.OnTriggerAttached(en);

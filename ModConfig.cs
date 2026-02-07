@@ -50,6 +50,10 @@ namespace DecayMode
         private static ConfigEntry<string> EnemiesWithDecayOnSpawnEntry;
         private static ConfigEntry<string> EnemiesIgnoredForDecayEntry;
 
+        private static ConfigEntry<int> DecayChanceEntry;
+        private static ConfigEntry<bool> IgnoreWitheringEntry;
+        private static ConfigEntry<bool> HideDecayEnemyEntry;
+
         private static ConfigEntry<DecayModeEnemyPool> EnemyPoolEntry;
         private static ConfigEntry<string> EnemyPoolExceptionsEntry;
         private static ConfigEntry<string> ModdedMassSpawnPoolEntry;
@@ -61,6 +65,10 @@ namespace DecayMode
         public static string[] EnemiesWithDecayOnSpawn => EnemiesWithDecayOnSpawnEntry?.Value?.Split(SeparatorArray, StringSplitOptions.RemoveEmptyEntries) ?? [];
         public static string[] EnemiesIgnoredForDecay => EnemiesIgnoredForDecayEntry?.Value?.Split(SeparatorArray, StringSplitOptions.RemoveEmptyEntries) ?? [];
 
+        public static int DecayChance => DecayChanceEntry?.Value ?? 100;
+        public static bool IgnoreWithering => IgnoreWitheringEntry?.Value ?? false;
+        public static bool HideDecayEnemy => HideDecayEnemyEntry?.Value ?? false;
+
         public static DecayModeEnemyPool EnemyPool => EnemyPoolEntry?.Value ?? DecayModeEnemyPool.Sepulchre;
         public static Dictionary<string, DecayModeEnemyPool> EnemyPoolExceptions => ConfigTools.DeserializeDictionary<string, DecayModeEnemyPool>(EnemyPoolExceptionsEntry?.Value, Separator, KVPSeparator);
         public static string ModdedMassSpawnPool => ModdedMassSpawnPoolEntry?.Value ?? string.Empty;
@@ -71,16 +79,20 @@ namespace DecayMode
 
         public static void Init()
         {
-            EnemiesWithDecayOnSpawnEntry = File.Bind("DecayMode", "EnemiesWithDecayOnSpawn", string.Join(Separator, EnemiesWithDecayOnSpawn_Default));
-            EnemiesIgnoredForDecayEntry = File.Bind("DecayMode", "EnemiesIgnoredForDecay", string.Join(Separator, EnemiesIgnoredForDecay_Default));
+            EnemiesWithDecayOnSpawnEntry    = File.Bind("DecayMode", "EnemiesWithDecayOnSpawn", string.Join(Separator, EnemiesWithDecayOnSpawn_Default));
+            EnemiesIgnoredForDecayEntry     = File.Bind("DecayMode", "EnemiesIgnoredForDecay", string.Join(Separator, EnemiesIgnoredForDecay_Default));
 
-            EnemyPoolEntry = File.Bind("DecayMode.EnemyPool", "EnemyPool", DecayModeEnemyPool.Sepulchre);
-            EnemyPoolExceptionsEntry = File.Bind("DecayMode.EnemyPool", "EnemiesWithBronzoDecay", ConfigTools.SerializeDictionary(EnemyPoolExceptions_Default, Separator, KVPSeparator));
-            ModdedMassSpawnPoolEntry = File.Bind("DecayMode.EnemyPool", "ModdedMassSpawnPool", "");
-            ModdedRandomSpawnPoolEntry = File.Bind("DecayMode.EnemyPool", "ModdedRandomSpawnPool", "");
-            ModdedTransformPoolEntry = File.Bind("DecayMode.EnemyPool", "ModdedTransformPool", "");
-            TargetUnitTypesEntry = File.Bind("DecayMode.EnemyPool", "TargetUnitTypes", "");
-            CustomEnemyPoolEntry = File.Bind("DecayMode.EnemyPool", "CustomEnemyPool", "");
+            DecayChanceEntry                = File.Bind("DecayMode.DecayParameters", "DecayChance", 100);
+            IgnoreWitheringEntry            = File.Bind("DecayMode.DecayParameters", "IgnoreWithering", false);
+            HideDecayEnemyEntry             = File.Bind("DecayMode.DecayParameters", "HideDecayEnemy", false);
+
+            EnemyPoolEntry                  = File.Bind("DecayMode.EnemyPool", "EnemyPool", DecayModeEnemyPool.Sepulchre);
+            EnemyPoolExceptionsEntry        = File.Bind("DecayMode.EnemyPool", "EnemiesWithBronzoDecay", ConfigTools.SerializeDictionary(EnemyPoolExceptions_Default, Separator, KVPSeparator));
+            ModdedMassSpawnPoolEntry        = File.Bind("DecayMode.EnemyPool", "ModdedMassSpawnPool", "");
+            ModdedRandomSpawnPoolEntry      = File.Bind("DecayMode.EnemyPool", "ModdedRandomSpawnPool", "");
+            ModdedTransformPoolEntry        = File.Bind("DecayMode.EnemyPool", "ModdedTransformPool", "");
+            TargetUnitTypesEntry            = File.Bind("DecayMode.EnemyPool", "TargetUnitTypes", "");
+            CustomEnemyPoolEntry            = File.Bind("DecayMode.EnemyPool", "CustomEnemyPool", "");
         }
     }
 }
