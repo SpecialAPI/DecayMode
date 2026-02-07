@@ -17,8 +17,8 @@ namespace DecayMode
                 return;
 
             var pool = ModConfig.EnemyPool;
-            if (Array.IndexOf(ModConfig.EnemiesWithBronzoDecay, en.Enemy.name) >= 0)
-                pool = DecayModeEnemyPool.Bronzo;
+            if (ModConfig.EnemyPoolExceptions.TryGetValue(en.Enemy.name, out var exPool))
+                pool = exPool;
 
             if (!EnemyPools.TryGetRandomEnemyFromPool(pool, out var rngEn))
                 return;

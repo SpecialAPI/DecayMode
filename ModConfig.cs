@@ -10,6 +10,7 @@ namespace DecayMode
         public static ConfigFile File;
 
         private const string Separator = ",";
+        private const string KVPSeparator = "=";
         private static readonly string[] SeparatorArray = [Separator];
 
         public static readonly string[] EnemiesWithDecayOnSpawn_Default = new string[]
@@ -29,12 +30,6 @@ namespace DecayMode
             "BronzoExtra_EN",
             "Bronzo_Bananas_Mean_EN"
         };
-        public static readonly string[] EnemiesWithBronzoDecay_Default = new string[]
-        {
-            "Bronzo_MoneyPile_EN",
-            "BronzoExtra_EN",
-            "Bronzo_Bananas_Mean_EN"
-        };
         public static readonly string[] EnemiesIgnoredForDecay_Default = new string[]
         {
             "OsmanSinnoks_BOSS",
@@ -45,12 +40,18 @@ namespace DecayMode
             "Bronzo4_EN",
             "Bronzo5_EN",
         };
+        public static readonly Dictionary<string, DecayModeEnemyPool> EnemyPoolExceptions_Default = new()
+        {
+            ["Bronzo_MoneyPile_EN"] = DecayModeEnemyPool.Bronzo,
+            ["BronzoExtra_EN"] = DecayModeEnemyPool.Bronzo,
+            ["Bronzo_Bananas_Mean_EN"] = DecayModeEnemyPool.Bronzo
+        };
 
         private static ConfigEntry<string> EnemiesWithDecayOnSpawnEntry;
         private static ConfigEntry<string> EnemiesIgnoredForDecayEntry;
 
         private static ConfigEntry<DecayModeEnemyPool> EnemyPoolEntry;
-        private static ConfigEntry<string> EnemiesWithBronzoDecayEntry;
+        private static ConfigEntry<string> EnemyPoolExceptionsEntry;
         private static ConfigEntry<string> ModdedMassSpawnPoolEntry;
         private static ConfigEntry<string> ModdedRandomSpawnPoolEntry;
         private static ConfigEntry<string> ModdedTransformPoolEntry;
@@ -61,7 +62,7 @@ namespace DecayMode
         public static string[] EnemiesIgnoredForDecay => EnemiesIgnoredForDecayEntry?.Value?.Split(SeparatorArray, StringSplitOptions.RemoveEmptyEntries) ?? [];
 
         public static DecayModeEnemyPool EnemyPool => EnemyPoolEntry?.Value ?? DecayModeEnemyPool.Sepulchre;
-        public static string[] EnemiesWithBronzoDecay => EnemiesWithBronzoDecayEntry?.Value?.Split(SeparatorArray, StringSplitOptions.RemoveEmptyEntries) ?? [];
+        public static Dictionary<string, DecayModeEnemyPool> EnemyPoolExceptions => ConfigTools.DeserializeDictionary<string, DecayModeEnemyPool>(EnemyPoolExceptionsEntry?.Value, Separator, KVPSeparator);
         public static string ModdedMassSpawnPool => ModdedMassSpawnPoolEntry?.Value ?? string.Empty;
         public static string ModdedRandomSpawnPool => ModdedRandomSpawnPoolEntry?.Value ?? string.Empty;
         public static string ModdedTransformPool => ModdedTransformPoolEntry?.Value ?? string.Empty;
@@ -74,7 +75,7 @@ namespace DecayMode
             EnemiesIgnoredForDecayEntry = File.Bind("DecayMode", "EnemiesIgnoredForDecay", string.Join(Separator, EnemiesIgnoredForDecay_Default));
 
             EnemyPoolEntry = File.Bind("DecayMode.EnemyPool", "EnemyPool", DecayModeEnemyPool.Sepulchre);
-            EnemiesWithBronzoDecayEntry = File.Bind("DecayMode.EnemyPool", "EnemiesWithBronzoDecay", string.Join(Separator, EnemiesWithBronzoDecay_Default));
+            EnemyPoolExceptionsEntry = File.Bind("DecayMode.EnemyPool", "EnemiesWithBronzoDecay", ConfigTools.SerializeDictionary(EnemyPoolExceptions_Default, Separator, KVPSeparator));
             ModdedMassSpawnPoolEntry = File.Bind("DecayMode.EnemyPool", "ModdedMassSpawnPool", "");
             ModdedRandomSpawnPoolEntry = File.Bind("DecayMode.EnemyPool", "ModdedRandomSpawnPool", "");
             ModdedTransformPoolEntry = File.Bind("DecayMode.EnemyPool", "ModdedTransformPool", "");
