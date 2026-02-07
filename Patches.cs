@@ -13,7 +13,7 @@ namespace DecayMode
     {
         public static void AddDecayToEnemy(EnemyCombat en)
         {
-            if (en == null || Array.IndexOf(ModConfig.EnemiesIgnoredForDecay, en.Enemy.name) >= 0)
+            if (en == null || ModConfig.EnemiesIgnoredForDecay.Contains(en.Enemy.name))
                 return;
 
             var pool = ModConfig.EnemyPool;
@@ -75,11 +75,10 @@ namespace DecayMode
 
         public static EnemyCombat AddDecay_OnSpawn_Add(EnemyCombat en)
         {
-            if (en == null || Array.IndexOf(ModConfig.EnemiesWithDecayOnSpawn, en.Enemy.name) < 0)
+            if (en == null || !ModConfig.EnemiesWithDecayOnSpawn.Contains(en.Enemy.name))
                 return en;
 
             AddDecayToEnemy(en);
-
             return en;
         }
 
