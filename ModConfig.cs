@@ -87,7 +87,7 @@ namespace DecayMode
             HideDecayEnemyEntry             = File.Bind("DecayMode.DecayParameters", "HideDecayEnemy", false);
 
             EnemyPoolEntry                  = File.Bind("DecayMode.EnemyPool", "EnemyPool", DecayModeEnemyPool.Sepulchre);
-            EnemyPoolExceptionsEntry        = File.Bind("DecayMode.EnemyPool", "EnemiesWithBronzoDecay", ConfigTools.SerializeDictionary(EnemyPoolExceptions_Default, Separator, KVPSeparator));
+            EnemyPoolExceptionsEntry        = File.Bind("DecayMode.EnemyPool", "EnemyPoolExceptions", ConfigTools.SerializeDictionary(EnemyPoolExceptions_Default, Separator, KVPSeparator));
             ModdedMassSpawnPoolEntry        = File.Bind("DecayMode.EnemyPool", "ModdedMassSpawnPool", "");
             ModdedRandomSpawnPoolEntry      = File.Bind("DecayMode.EnemyPool", "ModdedRandomSpawnPool", "");
             ModdedTransformPoolEntry        = File.Bind("DecayMode.EnemyPool", "ModdedTransformPool", "");
