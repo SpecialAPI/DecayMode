@@ -23,48 +23,12 @@ namespace DecayMode
         public static MethodInfo ad_os_adi = AccessTools.Method(typeof(Plugin), nameof(AddDecay_OnSpawn_ActuallyDoIt));
         public static MethodInfo adob_adi = AccessTools.Method(typeof(Plugin), nameof(AddDecayOnUnbox_ActuallyDoIt));
 
-        public static string[] EnemiesWithDecayOnSpawn = new string[]
-        {
-            "NextOfKin_EN",
-            "Moone_EN",
-
-            "HeavensGateBlue_BOSS",
-            "HeavensGatePurple_BOSS",
-            "HeavensGateRed_BOSS",
-            "HeavensGateYellow_BOSS",
-
-            "OsmanLeft_BOSS",
-            "OsmanRight_BOSS",
-
-            "Bronzo_MoneyPile_EN",
-            "BronzoExtra_EN",
-            "Bronzo_Bananas_Mean_EN"
-        };
-
-        public static string[] EnemiesWithBronzoDecay = new string[]
-        {
-            "Bronzo_MoneyPile_EN",
-            "BronzoExtra_EN",
-            "Bronzo_Bananas_Mean_EN"
-        };
-
-        public static string[] EnemiesIgnoredForDecay = new string[]
-        {
-            "OsmanSinnoks_BOSS",
-
-            "Bronzo1_EN",
-            "Bronzo2_EN",
-            "Bronzo3_EN",
-            "Bronzo4_EN",
-            "Bronzo5_EN",
-        };
-
         public static UnitStoreData_BasicSO PersonalizedDecayStoreData;
-        public static ConfigEntry<bool> decayMean;
 
         public void Awake()
         {
-            decayMean = Config.Bind("DecayMode", "DecayMean", false, "Bronzo mode. If set to true, Decay Mode will draw from the Bronzo pool instead of the Sepulchre pool.");
+            ModConfig.File = Config;
+            ModConfig.Init();
 
             PersonalizedDecayStoreData = ScriptableObject.CreateInstance<UnitStoreData_BasicSO>();
             PersonalizedDecayStoreData.name = PersonalizedDecayStoreData._UnitStoreDataID = "DecayMode_PersonalizedDecay_USD";
@@ -95,7 +59,7 @@ namespace DecayMode
 
         public static EnemyCombat AddDecay_OnSpawn_ActuallyDoIt(EnemyCombat en)
         {
-            if (en == null || Array.IndexOf(EnemiesWithDecayOnSpawn, en.Enemy.name) < 0)
+            if (en == null || Array.IndexOf(ModConfig.EnemiesWithDecayOnSpawn, en.Enemy.name) < 0)
                 return en;
 
             AddDecayToEnemy(en);
@@ -105,11 +69,11 @@ namespace DecayMode
 
         public static void AddDecayToEnemy(EnemyCombat en)
         {
-            if (en == null || Array.IndexOf(EnemiesIgnoredForDecay, en.Enemy.name) >= 0)
+            if (en == null || Array.IndexOf(ModConfig.EnemiesIgnoredForDecay, en.Enemy.name) >= 0)
                 return;
 
-            var bronzo = Array.IndexOf(EnemiesWithBronzoDecay, en.Enemy.name) >= 0;
-            if (decayMean != null && decayMean.Value)
+            var bronzo = Array.IndexOf(ModConfig.EnemiesWithBronzoDecay, en.Enemy.name) >= 0;
+            if (ModConfig.DecayMean)
                 bronzo = true;
 
             if (!TryGetDecayEnemy(bronzo, out var rngEn))
@@ -124,7 +88,7 @@ namespace DecayMode
             if (en.ContainsPassiveAbility(PassiveType_GameIDs.Decay.ToString()))
                 return; // WTF?
 
-            var personalizedDecay = Passives.DecayGenerator(rngEn);
+            var personalizedDecay = Passives.DecayGenerator(rngEn, 100, false);
 
             en.PassiveAbilities.Add(personalizedDecay);
             personalizedDecay.OnTriggerAttached(en);
