@@ -19,7 +19,7 @@
       <HintPath>..\References\BrutalOrchestra\Assembly-CSharp.dll</HintPath>
     </Reference>
     <Reference Include="BrutalAPI">
-      <HintPath>..\BrutalAPIFork\BrutalAPI\bin\Debug\netstandard2.0\BrutalAPI.dll</HintPath>
+      <HintPath>..\References\BrutalOrchestra\BrutalAPI.dll</HintPath>
     </Reference>
   </ItemGroup>
 
