@@ -54,6 +54,11 @@ namespace DecayMode
                 "HeavensGateRed_BOSS",
                 "HeavensGateYellow_BOSS",
 
+                "HeavensGateBlue_Enemy",
+                "HeavensGatePurple_Enemy",
+                "HeavensGateRed_Enemy",
+                "HeavensGateYellow_Enemy",
+
                 "OsmanLeft_BOSS",
                 "OsmanRight_BOSS",
 
